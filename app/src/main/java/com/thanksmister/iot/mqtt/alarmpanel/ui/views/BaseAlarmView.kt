@@ -97,18 +97,24 @@ abstract class BaseAlarmView : LinearLayout {
     @SuppressLint("InlinedApi")
     override fun onVisibilityChanged(changedView: View?, visibility: Int) {
         super.onVisibilityChanged(changedView, visibility)
+        if(useFingerprint) {
+            // TODO looks like this throws an error internally
+            try {
+                fingerPrintIdentity = FingerprintIdentify(context, BaseFingerprint.FingerprintIdentifyExceptionListener {
+                    Timber.w("Fingerprint Error: " + it.message)
+                })
+            } catch (e: ClassNotFoundException) {
+                Timber.w("Fingerprint: " + e.message)
+            }
 
-        fingerPrintIdentity = FingerprintIdentify(context, BaseFingerprint.FingerprintIdentifyExceptionListener {
-            Timber.e("Fingerprint Error: " + it.message)
-        })
-
-        if(fingerPrintIdentity != null) {
-            if(fingerPrintIdentity!!.isFingerprintEnable && fingerPrintIdentity!!.isHardwareEnable) {
-                if (!this.isShown){
-                    stopFingerprintIdentity()
-                    return
-                } else {
-                    startFingerprintIdentity()
+            if (fingerPrintIdentity != null) {
+                if (fingerPrintIdentity!!.isFingerprintEnable && fingerPrintIdentity!!.isHardwareEnable) {
+                    if (!this.isShown) {
+                        stopFingerprintIdentity()
+                        return
+                    } else {
+                        startFingerprintIdentity()
+                    }
                 }
             }
         }
